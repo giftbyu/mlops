@@ -15,3 +15,6 @@ Namun, analisis lebih lanjut menggunakan perbandingan numerik dengan toleransi (
 Perbedaan minor ini merupakan artefak komputasi yang wajar dan dapat diatribusikan pada variasi floating-point arithmetic antara lingkungan eksekusi yang berbeda. Perbedaan ini tidak signifikan secara statistik dan tidak akan memengaruhi performa model.
 
 **Reproduktifitas**: Tujuan utama untuk menciptakan sebuah proses yang dapat direproduksi telah tercapai. Skrip otomatis (preprocess.py) secara konsisten menerapkan logika yang sama (imputasi, penanganan outlier, feature engineering, dan normalisasi) seperti yang telah dieksplorasi dan divalidasi dalam notebook.
+
+
+![image](https://github.com/user-attachments/assets/e1b9939c-7fae-4fd0-bc74-5ab674eb328a)
