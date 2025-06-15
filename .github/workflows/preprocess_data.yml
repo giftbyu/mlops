@@ -1,31 +1,42 @@
-name: Otomatisasi Preprocessing Data
+# Nama workflow yang akan muncul di tab Actions GitHub
+name: Kriteria 1 - Otomatisasi Preprocessing Data
 
+# Trigger: Kapan workflow ini akan berjalan
 on:
+  # Berjalan saat ada 'push' ke branch 'main'
   push:
     branches:
       - main
-    paths:
-      - 'src/preprocess.py'
-      - 'data_raw/water_potability.csv'
+  # Memungkinkan workflow dijalankan secara manual dari tab Actions
   workflow_dispatch:
 
+# Daftar pekerjaan (jobs) yang akan dieksekusi
 jobs:
-  run-preprocessing:
+  # Nama job (bisa apa saja, contoh: 'build' atau 'run-preprocessing')
+  build:
+    # Menggunakan server virtual Ubuntu versi terbaru dari GitHub
     runs-on: ubuntu-latest
+
+    # Langkah-langkah yang akan dijalankan di dalam job
     steps:
-      - name: Checkout Repository
+      # Langkah 1: Mengunduh kode dari repositori Anda ke server virtual
+      - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Langkah 2: Menyiapkan lingkungan Python versi 3.9
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.12.7'
 
-      - name: Install Dependencies
+      # Langkah 3: Menginstall semua library yang ada di requirements.txt
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      # Langkah 4: Menjalankan skrip preprocess.py dengan path yang benar
+      # Perhatikan bagaimana path ditulis relatif dari direktori utama proyek
       - name: Run Preprocessing Script
         run: |
           python src/preprocess.py \
@@ -33,12 +44,16 @@ jobs:
             --output-path data_processed/processed_data.csv \
             --artifact-path data_processed/preprocessing_artifacts.pkl
 
+      # Langkah 5: Mengunggah hasil data yang sudah diproses sebagai artefak
       - name: Upload Processed Data
         uses: actions/upload-artifact@v4
         with:
+          # Nama artefak yang akan muncul di GitHub
           name: processed-data
+          # Lokasi file yang akan diunggah
           path: data_processed/processed_data.csv
 
+      # Langkah 6: Mengunggah artefak preprocessing (imputer, scaler, dll)
       - name: Upload Preprocessing Artifacts
         uses: actions/upload-artifact@v4
         with:
