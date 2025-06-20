@@ -38,7 +38,6 @@ def feature_engineering(df):
     df['mineral_saturation'] = df['Hardness'] * (10**(-df['ph_original']))
     df['TDS_ratio'] = df['Solids'] / df['Conductivity']
     
-    # 3. Buat fitur kategori dengan pH asli
     df['ph_category'] = pd.cut(
         df['ph_original'], 
         bins=[0, 6.5, 8.5, 14],
@@ -53,31 +52,23 @@ def feature_engineering(df):
         include_lowest=True
     )
     
-    # 4. Hapus kolom pH asli sementara
     df = df.drop(columns=['ph_original'])
     
     print("  - Fitur baru berhasil dibuat.")
     return df
 
 def main(args):
-    # Langkah 1: Load data dan handle duplicates
     df = load_data(args.input_path)
     df = handle_duplicates(df)
-    
-    # Langkah 2: Handle missing values
     print("Memulai imputasi nilai yang hilang dengan KNNImputer...")
     imputer = KNNImputer(n_neighbors=5)
     df_imputed = pd.DataFrame(imputer.fit_transform(df), columns=df.columns)
     print(f"Imputasi selesai. Jumlah nilai hilang setelahnya: {df_imputed.isna().sum().sum()}")
-    
-    # Langkah 3: Handle outliers
     outlier_cols = ['Solids', 'Trihalomethanes', 'Conductivity']
     df_capped = iqr_capping(df_imputed, outlier_cols, factor=2.0)
-    
-    # Langkah 4: Feature engineering
+
     df_featured = feature_engineering(df_capped)
-    
-    # Langkah 5: One-Hot Encoding
+
     print("Memulai One-Hot Encoding untuk fitur kategorikal...")
     categorical_features = ['ph_category', 'hardness_level']
     encoder = OneHotEncoder(drop='first', sparse_output=False, handle_unknown='ignore')
@@ -92,7 +83,6 @@ def main(args):
     df_processed = df_processed.drop(columns=categorical_features)
     print("Encoding selesai.")
 
-    # Langkah 6: Normalisasi (TANPA pH)
     print("Memulai normalisasi dengan RobustScaler...")
     numerical_features = [
         'Hardness', 'Solids', 'Chloramines', 'Sulfate',
@@ -103,7 +93,6 @@ def main(args):
     df_processed[numerical_features] = scaler.fit_transform(df_processed[numerical_features])
     print("Normalisasi selesai.")
 
-    # Simpan artefak
     preprocessing_artifacts = {
         'imputer': imputer,
         'encoder': encoder,
@@ -117,7 +106,7 @@ def main(args):
     joblib.dump(preprocessing_artifacts, args.artifact_path)
     print(f"Artefak preprocessing disimpan di: {args.artifact_path}")
 
-    # Simpan data hasil
+
     os.makedirs(os.path.dirname(args.output_path), exist_ok=True)
     df_processed.to_csv(args.output_path, index=False)
     print(f"Preprocessing selesai. Data bersih disimpan di: {args.output_path}")
